@@ -1,4 +1,4 @@
-name: Deploy Laravel to Azure
+name: Deploy Laravel to Azure (Linux)
 
 on:
   push:
@@ -24,12 +24,11 @@ jobs:
       - name: Install dependencies
         run: composer install --no-dev --optimize-autoloader
 
-      - name: Generate app key
-        run: php artisan key:generate --force
-
-      - name: Prepare public folder for Azure
+      - name: Optimize Laravel
         run: |
-          echo "<configuration><system.webServer><rewrite><rules><rule name='Laravel' stopProcessing='true'><match url='.*' /><conditions logicalGrouping='MatchAll'><add input='{REQUEST_FILENAME}' matchType='IsFile' negate='true' /><add input='{REQUEST_FILENAME}' matchType='IsDirectory' negate='true' /></conditions><action type='Rewrite' url='public/{R:0}' /></rule></rules></rewrite></system.webServer></configuration>" > web.config
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
 
       - name: Deploy to Azure
         uses: azure/webapps-deploy@v3
